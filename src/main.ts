@@ -5,14 +5,20 @@ import { NATS_DEFAULT_URL } from '@nestjs/microservices/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.connectMicroservice<MicroserviceOptions>({
+  const microserviceNATS = app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
       servers: [NATS_DEFAULT_URL],
     },
   });
+  const microserviceTCP = app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      port: 3001,
+    },
+  });
   await app.startAllMicroservices();
-  await app.listen(3001, () => {
+  await app.listen(3002, () => {
     console.log('Reader-service started');
   });
 }
