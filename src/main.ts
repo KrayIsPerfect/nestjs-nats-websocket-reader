@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { NATS_DEFAULT_URL } from '@nestjs/microservices/constants';
+import {AppService} from "./app.service";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,7 @@ async function bootstrap() {
   });
   await app.startAllMicroservices();
   await app.listen(3002, () => {
+    app.get(AppService).startSendData();
     console.log('Reader-service started');
   });
 }

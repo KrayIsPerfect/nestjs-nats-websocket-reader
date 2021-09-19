@@ -1,9 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
-import { Transport } from '@nestjs/microservices';
-import { DataTypeEnum } from './utils/data.type.enum';
+import {Controller, Get} from '@nestjs/common';
+import {AppService} from './app.service';
+import {MessagePattern, Transport} from '@nestjs/microservices';
+import {DataTypeEnum} from './utils/data.type.enum';
 
-@Controller('api')
+@Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -25,5 +25,29 @@ export class AppController {
   @Get('tcp/object')
   async sendObject(): Promise<void> {
     await this.appService.sendData(DataTypeEnum.DATA, Transport.TCP);
+  }
+
+  @Get('sendDataOn')
+  sendDataOn(): void {
+    this.appService.sendDataOnOff(true, Transport.NATS);
+    this.appService.sendDataOnOff(true, Transport.TCP);
+  }
+
+  @Get('sendDataOff')
+  sendDataOff(): void {
+    this.appService.sendDataOnOff(false, Transport.NATS);
+    this.appService.sendDataOnOff(false, Transport.TCP);
+  }
+
+  @MessagePattern('reader.send.data.on.off.nats', Transport.NATS)
+  handleDataNats(data: boolean): void {
+    console.log('received "reader.send.data.on.off.nats"');
+    this.appService.sendDataOnOff(data, Transport.NATS);
+  }
+
+  @MessagePattern({cmd: 'reader.send.data.on.off.tcp'}, Transport.TCP)
+  handleDataTcp(data: boolean): void {
+    console.log('received "reader.send.data.on.off.tcp"');
+    this.appService.sendDataOnOff(data, Transport.TCP);
   }
 }
